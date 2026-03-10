@@ -50,14 +50,14 @@ from .video_utils import (
     sanitize_filename,
     guess_filename_from_url,
     ensure_within_base,
-    normalize_video_aspect,
-    embed_thumbnail,
-    resize_video,
-    get_video_dimensions,
 )
+
+from custom_components.video_normalizer.video_processor import VideoProcessor  # type: ignore[import-not-found]
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[str] = ["sensor"]
+
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".avi"}
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -67,6 +67,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     )
+
+    video_processor = VideoProcessor()
 
     @callback
     def _get_config() -> tuple[Path, bool]:
@@ -134,31 +136,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 "url": url, "path": str(dest_path)
             })
 
-            # Always normalize aspect and embed thumbnail
-            if normalize_video_aspect(dest_path):
-                hass.bus.async_fire("media_downloader_aspect_normalized", {
-                    "path": str(dest_path)
-                })
-
-            if embed_thumbnail(dest_path):
-                hass.bus.async_fire("media_downloader_thumbnail_embedded", {
-                    "path": str(dest_path)
-                })
-
-            # Optional resize
-            if resize_enabled and dest_path.suffix.lower() in [".mp4", ".mov", ".mkv", ".avi"]:
-                w, h = get_video_dimensions(dest_path)
-                if w != resize_width or h != resize_height:
+            # Delegate video processing (aspect normalization, thumbnail embedding,
+            # optional resize) to Video Normalizer
+            if dest_path.suffix.lower() in VIDEO_EXTENSIONS:
+                if resize_enabled:
                     sensor.start_process(PROCESS_RESIZING)
-                    if resize_video(dest_path, resize_width, resize_height):
-                        hass.bus.async_fire("media_downloader_resize_completed", {
-                            "path": str(dest_path), "width": resize_width, "height": resize_height
-                        })
-                    else:
-                        hass.bus.async_fire("media_downloader_resize_failed", {
+                try:
+                    process_result = await video_processor.process_video(
+                        video_path=str(dest_path),
+                        overwrite=True,
+                        normalize_aspect=True,
+                        generate_thumbnail=True,
+                        resize_width=resize_width if resize_enabled else None,
+                        resize_height=resize_height if resize_enabled else None,
+                    )
+                    operations = process_result.get("operations", {})
+
+                    if operations.get("normalize_aspect"):
+                        hass.bus.async_fire("media_downloader_aspect_normalized", {
                             "path": str(dest_path)
                         })
-                    sensor.end_process(PROCESS_RESIZING)
+
+                    if operations.get("embed_thumbnail"):
+                        hass.bus.async_fire("media_downloader_thumbnail_embedded", {
+                            "path": str(dest_path)
+                        })
+
+                    if resize_enabled:
+                        if operations.get("resize"):
+                            hass.bus.async_fire("media_downloader_resize_completed", {
+                                "path": str(dest_path),
+                                "width": resize_width,
+                                "height": resize_height,
+                            })
+                        elif "resize" in operations and not operations["resize"]:
+                            hass.bus.async_fire("media_downloader_resize_failed", {
+                                "path": str(dest_path)
+                            })
+
+                    temp_files = process_result.get("temp_files", [])
+                    if temp_files:
+                        await video_processor.cleanup_temp_files(temp_files)
+                finally:
+                    if resize_enabled:
+                        sensor.end_process(PROCESS_RESIZING)
 
             hass.bus.async_fire("media_downloader_job_completed", {
                 "url": url, "path": str(dest_path)
