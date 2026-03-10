@@ -68,6 +68,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     )
 
+    from homeassistant.components import persistent_notification as _pn  # noqa: PLC0415
+
+    # Warn if the core "downloader" integration is loaded (configured via
+    # configuration.yaml). Advanced Downloader is a full superset of its
+    # functionality; having both active serves no purpose and may cause confusion.
+    if "downloader" in hass.config.components:
+        _LOGGER.warning(
+            "The built-in 'downloader' integration is active alongside Advanced "
+            "Downloader. Remove 'downloader:' from your configuration.yaml and "
+            "restart Home Assistant to avoid redundancy."
+        )
+        _pn.async_create(
+            hass,
+            (
+                "The built-in **Downloader** integration is loaded in your "
+                "configuration. **Advanced Downloader** provides a full superset of "
+                "its functionality.\n\n"
+                "To avoid redundancy, remove `downloader:` from your "
+                "`configuration.yaml` and restart Home Assistant."
+            ),
+            title="Advanced Downloader: Remove core Downloader integration",
+            notification_id="advanced_downloader_core_downloader_conflict",
+        )
+
     # Warn if Video Normalizer is also configured as a standalone integration.
     # Its code must remain installed (Advanced Downloader imports from it), but
     # the standalone config entry should be removed to avoid duplicate processing.
@@ -78,7 +102,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Services to avoid duplicate video processing. Keep the HACS package "
             "installed — Advanced Downloader still requires its code."
         )
-        from homeassistant.components import persistent_notification as _pn  # noqa: PLC0415
         _pn.async_create(
             hass,
             (

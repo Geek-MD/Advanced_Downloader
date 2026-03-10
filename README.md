@@ -17,7 +17,7 @@
 **Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
 
 > **Domain:** `advanced_downloader`  
-> This integration coexists with the core `downloader` integration. If you no longer need the core `downloader`, remove `downloader:` from your `configuration.yaml`.
+> Advanced Downloader is a full superset of the core `downloader` integration. If you have `downloader:` in your `configuration.yaml`, a persistent notification will appear at startup reminding you to remove it. After removing it, restart Home Assistant.
 
 ---
 
