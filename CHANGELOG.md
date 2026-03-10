@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Core `downloader` integration conflict detection:** if the built-in `downloader` integration is loaded (i.e. `downloader:` is present in `configuration.yaml`), a persistent notification now appears at startup. The notification explains that Advanced Downloader is a full superset and guides the user to remove `downloader:` from `configuration.yaml` and restart Home Assistant.
+- **`target_aspect_ratio` parameter for `download_file`:** the service now accepts an optional `target_aspect_ratio` (float, e.g. `1.777` for 16:9) that is forwarded to Video Normalizer's `VideoProcessor.process_video` during aspect normalisation. This replaces the equivalent parameter that was previously only available via the standalone `video_normalizer.normalize_video` service.
+- **`last_job` attribute on `sensor.advanced_downloader_status`:** the sensor now exposes a `last_job` attribute (`null`, `success`, or `failed`) that reflects the outcome of the most recent download job, providing parity with the `last_job` attribute previously available on `sensor.video_normalizer_status`.
+- **Automation migration guide** added to README, showing step-by-step how to replace automations that combined the core `downloader` integration with the standalone Video Normalizer integration.
 
 ### Fixed
 - The Video Normalizer conflict notification import (`persistent_notification`) is now hoisted and shared between both conflict checks, removing a redundant in-block import.

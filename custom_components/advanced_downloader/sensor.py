@@ -24,6 +24,7 @@ class AdvancedDownloaderStatusSensor(SensorEntity):
             "last_changed": None,
             "subprocess": None,
             "active_processes": [],
+            "last_job": None,
         }
         self._hass = hass
         self._active_processes: set[str] = set()
@@ -51,6 +52,14 @@ class AdvancedDownloaderStatusSensor(SensorEntity):
             self._attr_extra_state_attributes["subprocess"] = next(iter(self._active_processes))
         self._attr_extra_state_attributes["active_processes"] = list(self._active_processes)
         self._attr_extra_state_attributes["last_changed"] = datetime.now().isoformat()
+        self.async_write_ha_state()
+
+    def set_last_job(self, value: str | None) -> None:
+        """Record the outcome of the last completed download job.
+
+        Accepted values: ``'success'``, ``'failed'``, or ``None`` to reset.
+        """
+        self._attr_extra_state_attributes["last_job"] = value
         self.async_write_ha_state()
 
     @property
