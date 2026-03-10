@@ -1,6 +1,6 @@
 {
-  "domain": "media_downloader",
-  "name": "Media Downloader",
+  "domain": "advanced_downloader",
+  "name": "Advanced Downloader",
   "codeowners": ["@Geek-MD"],
   "config_flow": true,
   "dependencies": ["video_normalizer"],

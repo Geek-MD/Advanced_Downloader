@@ -1,4 +1,4 @@
-"""Video utilities for Media Downloader integration."""
+"""Video utilities for Advanced Downloader integration."""
 
 from __future__ import annotations
 

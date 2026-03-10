@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Media Downloader",
+        "title": "Advanced Downloader",
         "description": "Configure la carpeta base donde se guardarán las descargas.",
         "data": {
           "download_dir": "Directorio base de descargas (ruta absoluta, ej. /media)",
@@ -14,7 +14,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "Opciones de Media Downloader",
+        "title": "Opciones de Advanced Downloader",
         "data": {
           "download_dir": "Directorio base de descargas",
           "overwrite": "Sobrescribir por defecto",

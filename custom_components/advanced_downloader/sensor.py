@@ -12,11 +12,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import DOMAIN
 
 
-class MediaDownloaderStatusSensor(SensorEntity):
-    """Sensor to track Media Downloader status."""
+class AdvancedDownloaderStatusSensor(SensorEntity):
+    """Sensor to track Advanced Downloader status."""
 
-    _attr_name = "Media Downloader Status"
-    _attr_unique_id = "media_downloader_status"
+    _attr_name = "Advanced Downloader Status"
+    _attr_unique_id = "advanced_downloader_status"
 
     def __init__(self, hass: HomeAssistant) -> None:
         self._attr_native_value: str = "idle"
@@ -57,8 +57,8 @@ class MediaDownloaderStatusSensor(SensorEntity):
     def device_info(self) -> DeviceInfo:
         """Return device info for grouping in HA UI."""
         return DeviceInfo(
-            identifiers={(DOMAIN, "media_downloader_status")},
-            name="Media Downloader",
+            identifiers={(DOMAIN, "advanced_downloader_status")},
+            name="Advanced Downloader",
             manufacturer="Geek-MD",
         )
 
@@ -66,9 +66,9 @@ class MediaDownloaderStatusSensor(SensorEntity):
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up the Media Downloader sensor."""
+    """Set up the Advanced Downloader sensor."""
     sensor = hass.data[DOMAIN].get("status_sensor")
     if sensor is None:
-        sensor = MediaDownloaderStatusSensor(hass)
+        sensor = AdvancedDownloaderStatusSensor(hass)
         hass.data[DOMAIN]["status_sensor"] = sensor
     async_add_entities([sensor])

@@ -1,10 +1,10 @@
 {
-  "name": "Media Downloader",
+  "name": "Advanced Downloader",
   "content_in_root": false,
-  "domains": ["media_downloader"],
+  "domains": ["advanced_downloader"],
   "country": "global",
   "render_readme": true,
-  "filename": "custom_components/media_downloader/manifest.json",
+  "filename": "custom_components/advanced_downloader/manifest.json",
   "homeassistant": "2024.1.0",
   "iot_class": "local_push",
   "category": "integration",
