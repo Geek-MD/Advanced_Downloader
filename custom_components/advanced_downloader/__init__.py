@@ -40,6 +40,7 @@ from .const import (
     ATTR_RESIZE_ENABLED,
     ATTR_RESIZE_WIDTH,
     ATTR_RESIZE_HEIGHT,
+    ATTR_TARGET_ASPECT_RATIO,
     PROCESS_DOWNLOADING,
     PROCESS_RESIZING,
     PROCESS_FILE_DELETING,
@@ -68,6 +69,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     )
 
+    from homeassistant.components import persistent_notification as _pn  # noqa: PLC0415
+
+    # Warn if the core "downloader" integration is loaded (configured via
+    # configuration.yaml). Advanced Downloader is a full superset of its
+    # functionality; having both active serves no purpose and may cause confusion.
+    if "downloader" in hass.config.components:
+        _LOGGER.warning(
+            "The built-in 'downloader' integration is active alongside Advanced "
+            "Downloader. Remove 'downloader:' from your configuration.yaml and "
+            "restart Home Assistant to avoid redundancy."
+        )
+        _pn.async_create(
+            hass,
+            (
+                "The built-in **Downloader** integration is loaded in your "
+                "configuration. **Advanced Downloader** provides a full superset of "
+                "its functionality.\n\n"
+                "To avoid redundancy, remove `downloader:` from your "
+                "`configuration.yaml` and restart Home Assistant."
+            ),
+            title="Advanced Downloader: Remove core Downloader integration",
+            notification_id="advanced_downloader_core_downloader_conflict",
+        )
+
     # Warn if Video Normalizer is also configured as a standalone integration.
     # Its code must remain installed (Advanced Downloader imports from it), but
     # the standalone config entry should be removed to avoid duplicate processing.
@@ -78,7 +103,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Services to avoid duplicate video processing. Keep the HACS package "
             "installed — Advanced Downloader still requires its code."
         )
-        from homeassistant.components import persistent_notification as _pn  # noqa: PLC0415
         _pn.async_create(
             hass,
             (
@@ -120,6 +144,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         resize_enabled: bool = call.data.get(ATTR_RESIZE_ENABLED, False)
         resize_width: int = int(call.data.get(ATTR_RESIZE_WIDTH, 640))
         resize_height: int = int(call.data.get(ATTR_RESIZE_HEIGHT, 360))
+        target_aspect_ratio: Optional[float] = call.data.get(ATTR_TARGET_ASPECT_RATIO)
 
         base_dir, default_overwrite = _get_config()
         base_dir = base_dir.resolve()
@@ -168,14 +193,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if resize_enabled:
                     sensor.start_process(PROCESS_RESIZING)
                 try:
-                    process_result = await video_processor.process_video(
-                        video_path=str(dest_path),
-                        overwrite=True,
-                        normalize_aspect=True,
-                        generate_thumbnail=True,
-                        resize_width=resize_width if resize_enabled else None,
-                        resize_height=resize_height if resize_enabled else None,
-                    )
+                    process_kwargs: dict = {
+                        "video_path": str(dest_path),
+                        "overwrite": True,
+                        "normalize_aspect": True,
+                        "generate_thumbnail": True,
+                        "resize_width": resize_width if resize_enabled else None,
+                        "resize_height": resize_height if resize_enabled else None,
+                    }
+                    if target_aspect_ratio is not None:
+                        process_kwargs["target_aspect_ratio"] = target_aspect_ratio
+                    process_result = await video_processor.process_video(**process_kwargs)
                     operations = process_result.get("operations", {})
 
                     if operations.get("normalize_aspect"):
@@ -207,12 +235,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     if resize_enabled:
                         sensor.end_process(PROCESS_RESIZING)
 
+            sensor.set_last_job("success")
             hass.bus.async_fire("advanced_downloader_job_completed", {
                 "url": url, "path": str(dest_path)
             })
 
         except Exception as err:
             _LOGGER.error("Download failed: %s", err)
+            sensor.set_last_job("failed")
             hass.bus.async_fire("advanced_downloader_download_failed", {
                 "url": url, "error": str(err)
             })
@@ -280,6 +310,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             vol.Optional(ATTR_RESIZE_ENABLED): cv.boolean,
             vol.Optional(ATTR_RESIZE_WIDTH): vol.Coerce(int),
             vol.Optional(ATTR_RESIZE_HEIGHT): vol.Coerce(int),
+            vol.Optional(ATTR_TARGET_ASPECT_RATIO): vol.Coerce(float),
         }),
     )
 

@@ -17,7 +17,7 @@
 **Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
 
 > **Domain:** `advanced_downloader`  
-> This integration coexists with the core `downloader` integration. If you no longer need the core `downloader`, remove `downloader:` from your `configuration.yaml`.
+> Advanced Downloader is a full superset of the core `downloader` integration. If you have `downloader:` in your `configuration.yaml`, a persistent notification will appear at startup reminding you to remove it. After removing it, restart Home Assistant.
 
 ---
 
@@ -107,6 +107,7 @@ For video files, the following steps are always performed via Video Normalizer:
 | `resize_enabled` | no | If true, resize the video when dimensions mismatch. |
 | `resize_width` | no | Target width for resize (default 640). |
 | `resize_height` | no | Target height for resize (default 360). |
+| `target_aspect_ratio` | no | Target display aspect ratio as decimal (e.g. `1.777` for 16:9). Passed to Video Normalizer during normalization. Omit to let Video Normalizer infer from the video's own dimensions. |
 
 #### Example:
 ```yaml
@@ -157,6 +158,7 @@ The integration provides the persistent entity:
 | `last_changed` | Datetime when state last changed. |
 | `subprocess` | Current subprocess name (`downloading`, `resizing`, `file_deleting`, `dir_deleting`). |
 | `active_processes` | List of all currently active subprocesses. |
+| `last_job` | Outcome of the last download job: `null` (no job yet), `success`, or `failed`. |
 
 ---
 
@@ -198,6 +200,132 @@ The integration provides the persistent entity:
     video: "{{ wait.trigger.event.data.path }}"
     caption: "New video from Ring (normalized with thumbnail)."
 ```
+
+---
+
+## 🔄 Migration Guide
+
+### Migrating from `downloader` + `video_normalizer` automations
+
+If you previously had automations that combined the core **Downloader** integration
+(`downloader.download_file`) with the standalone **Video Normalizer** integration
+(`video_normalizer.normalize_video`), follow this guide to migrate them to
+**Advanced Downloader**, which performs both operations in a single service call.
+
+#### Before (two integrations)
+
+```yaml
+# 1. Download the file using the core Downloader integration
+- action: downloader.download_file
+  data:
+    url: "{{ url }}"
+    subdir: ring
+    filename: ring.mp4
+    overwrite: true
+
+# 2. Wait for the download event fired by the core Downloader
+- wait_for_trigger:
+    - trigger: event
+      event_type: downloader_download_completed
+  continue_on_timeout: false
+
+# 3. Normalize the video using the standalone Video Normalizer integration
+- action: video_normalizer.normalize_video
+  data:
+    overwrite: true
+    normalize_aspect: true
+    generate_thumbnail: true
+    input_file_path: /media/ring/ring.mp4
+    target_aspect_ratio: 1.777
+
+# 4. Wait for Video Normalizer to finish (poll the sensor)
+- if:
+    - condition: state
+      entity_id: sensor.video_normalizer_status
+      state: idle
+  then: []
+  else:
+    - wait_for_trigger:
+        - trigger: state
+          entity_id: sensor.video_normalizer_status
+          to: idle
+
+# 5. Act on outcome via last_job attribute
+- if:
+    - condition: template
+      value_template: >-
+        {{ state_attr('sensor.video_normalizer_status', 'last_job') in
+           ['success', 'skipped'] }}
+  then:
+    - action: telegram_bot.send_video
+      data:
+        file: /media/ring/ring.mp4
+        caption: Se detectó movimiento en Entrada.
+  else:
+    - action: telegram_bot.send_message
+      data:
+        message: Se detectó movimiento en Entrada.
+```
+
+#### After (Advanced Downloader only)
+
+```yaml
+# 1. Download + normalize in one call
+- action: advanced_downloader.download_file
+  data:
+    url: "{{ url }}"
+    subdir: ring
+    filename: ring.mp4
+    overwrite: true
+    target_aspect_ratio: 1.777   # forwarded to Video Normalizer
+
+# 2. Wait for job completion (success) or failure
+- wait_for_trigger:
+    - trigger: event
+      event_type: advanced_downloader_job_completed
+    - trigger: event
+      event_type: advanced_downloader_download_failed
+  continue_on_timeout: false
+
+# 3. Act on outcome via the trigger event type
+- if:
+    - condition: template
+      value_template: >-
+        {{ wait.trigger.event.event_type ==
+           'advanced_downloader_job_completed' }}
+  then:
+    - action: telegram_bot.send_video
+      data:
+        file: /media/ring/ring.mp4
+        caption: Se detectó movimiento en Entrada.
+  else:
+    - action: telegram_bot.send_message
+      data:
+        message: Se detectó movimiento en Entrada.
+```
+
+Alternatively, you can check the `last_job` attribute on
+`sensor.advanced_downloader_status` (values: `success` or `failed`) the same
+way you previously checked `sensor.video_normalizer_status`:
+
+```yaml
+- if:
+    - condition: template
+      value_template: >-
+        {{ state_attr('sensor.advanced_downloader_status', 'last_job') ==
+           'success' }}
+  then: ...
+```
+
+#### Key mapping
+
+| Old | New |
+|-----|-----|
+| `downloader.download_file` | `advanced_downloader.download_file` |
+| `video_normalizer.normalize_video` | *(built-in — no separate call needed)* |
+| `downloader_download_completed` event + poll `sensor.video_normalizer_status` → idle | `advanced_downloader_job_completed` event (success) or `advanced_downloader_download_failed` event (failure) |
+| `sensor.video_normalizer_status` state | `sensor.advanced_downloader_status` state |
+| `sensor.video_normalizer_status` `last_job` | `sensor.advanced_downloader_status` `last_job` |
 
 ---
 

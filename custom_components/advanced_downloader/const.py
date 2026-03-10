@@ -21,6 +21,7 @@ ATTR_RESIZE_ENABLED = "resize_enabled"
 ATTR_RESIZE_WIDTH = "resize_width"
 ATTR_RESIZE_HEIGHT = "resize_height"
 ATTR_RESIZED = "resized"
+ATTR_TARGET_ASPECT_RATIO = "target_aspect_ratio"
 
 # Subprocess names
 PROCESS_DOWNLOADING = "downloading"
