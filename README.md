@@ -1,20 +1,20 @@
-[![Geek-MD - Advanced Downloader](https://img.shields.io/static/v1?label=Geek-MD&message=Advanced%20Downloader&color=blue&logo=github)](https://github.com/Geek-MD/Media_Downloader)
-[![Stars](https://img.shields.io/github/stars/Geek-MD/Media_Downloader?style=social)](https://github.com/Geek-MD/Media_Downloader)
-[![Forks](https://img.shields.io/github/forks/Geek-MD/Media_Downloader?style=social)](https://github.com/Geek-MD/Media_Downloader)
+[![Geek-MD - Advanced Downloader](https://img.shields.io/static/v1?label=Geek-MD&message=Advanced%20Downloader&color=blue&logo=github)](https://github.com/Geek-MD/Advanced_Downloader)
+[![Stars](https://img.shields.io/github/stars/Geek-MD/Advanced_Downloader?style=social)](https://github.com/Geek-MD/Advanced_Downloader)
+[![Forks](https://img.shields.io/github/forks/Geek-MD/Advanced_Downloader?style=social)](https://github.com/Geek-MD/Advanced_Downloader)
 
-[![GitHub Release](https://img.shields.io/github/release/Geek-MD/Media_Downloader?include_prereleases&sort=semver&color=blue)](https://github.com/Geek-MD/Media_Downloader/releases)
-[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/Geek-MD/Media_Downloader/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/Geek-MD/Advanced_Downloader?include_prereleases&sort=semver&color=blue)](https://github.com/Geek-MD/Advanced_Downloader/releases)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/Geek-MD/Advanced_Downloader/blob/main/LICENSE)
 [![HACS Custom Repository](https://img.shields.io/badge/HACS-Custom%20Repository-blue)](https://hacs.xyz/)
 
-[![Ruff + Mypy + Hassfest](https://github.com/Geek-MD/Media_Downloader/actions/workflows/validate.yml/badge.svg)](https://github.com/Geek-MD/Media_Downloader/actions/workflows/validate.yml)
+[![Ruff + Mypy + Hassfest](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml/badge.svg)](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
-<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Media_Downloader/blob/main/logo.png?raw=true" />
+<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Advanced_Downloader/blob/main/logo.png?raw=true" />
 
 # Advanced Downloader
 
-**Advanced Downloader** is a custom Home Assistant integration that replaces and greatly extends the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
+**Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
 
 > **Domain:** `advanced_downloader`  
 > This integration coexists with the core `downloader` integration. If you no longer need the core `downloader`, remove `downloader:` from your `configuration.yaml`.
@@ -52,7 +52,7 @@
 
 ### Option 1: Manual Installation
 1. Install [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) first.
-2. Download the latest release from [GitHub](https://github.com/Geek-MD/Media_Downloader/releases).
+2. Download the latest release from [GitHub](https://github.com/Geek-MD/Advanced_Downloader/releases).
 3. Copy the folder `advanced_downloader` into:
    ```
    /config/custom_components/advanced_downloader/
@@ -67,7 +67,7 @@
 2. Go to **HACS → Integrations → Custom Repositories**.
 3. Add the repository URL:
    ```
-   https://github.com/Geek-MD/Media_Downloader
+   https://github.com/Geek-MD/Advanced_Downloader
    ```
 4. Select **Integration** as category.
 5. Install **Advanced Downloader** from HACS.
@@ -203,6 +203,11 @@ The integration provides the persistent entity:
 
 ## 🧾 License
 MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## 📋 Changelog
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
 ---
 

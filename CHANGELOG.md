@@ -1,0 +1,212 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.2.0] - 2026-03-10
+
+> ⚠️ **Breaking change:** The integration domain has changed from `media_downloader` to `advanced_downloader`. Update any automations, scripts, or templates that reference `media_downloader.*` services or `media_downloader_*` events.
+
+### Added
+- **[Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) is now a required dependency.** All video post-processing (aspect ratio normalization, thumbnail generation/embedding, and optional resizing) is delegated to Video Normalizer's `VideoProcessor`, eliminating duplicated logic.
+- **Startup conflict detection:** if Video Normalizer is also configured as a standalone integration, a persistent Home Assistant notification is created to guide the user to remove that config entry (while keeping the HACS package installed, since Advanced Downloader still requires its code).
+- `issue_tracker` field added to `manifest.json`.
+
+### Changed
+- **Integration renamed** from *Media Downloader* to *Advanced Downloader*.
+- **Domain changed** from `media_downloader` to `advanced_downloader`.
+  - Integration folder: `custom_components/advanced_downloader/`
+  - All service names: `advanced_downloader.download_file`, `advanced_downloader.delete_file`, `advanced_downloader.delete_files_in_directory`
+  - All event names: `advanced_downloader_download_completed`, `advanced_downloader_download_failed`, `advanced_downloader_aspect_normalized`, `advanced_downloader_thumbnail_embedded`, `advanced_downloader_resize_completed`, `advanced_downloader_resize_failed`, `advanced_downloader_job_completed`
+  - Status sensor entity: `sensor.advanced_downloader_status`
+- `video_utils.py` simplified to path/filename utilities only (`sanitize_filename`, `ensure_within_base`, `guess_filename_from_url`). All video-processing functions removed in favour of the Video Normalizer dependency.
+
+---
+
+## [1.1.6] - 2025-12-XX
+
+### Fixed
+- Improved error logging for subprocess failures.
+- Fixed shell escaping issues in ffmpeg/ffprobe command calls.
+- Fixed subprocess timeout handling to prevent hanging processes.
+
+---
+
+## [1.1.5] - 2025-12-06
+
+### Fixed
+- **Fixed `async_timeout` deprecation warning:** added Python 3.11+ compatibility with automatic fallback to `async_timeout` for older versions, ensuring compatibility across different Home Assistant installations.
+- **Fixed `UnboundLocalError` in `normalize_video_aspect()`:** resolved potential crash where `tmp_file` variable could be referenced before assignment in the exception handler.
+- **Fixed `UnboundLocalError` in `embed_thumbnail()`:** improved exception handling to properly define temporary file paths before cleanup operations.
+
+---
+
+## [1.1.4] - 2025-11-20
+
+### Improved
+- All blocking post-processing (normalization, thumbnail embedding, resize, and dimension detection) now runs in an executor via `hass.async_add_executor_job` to avoid blocking the Home Assistant event loop.
+- Status sensor lifecycle hardened: the sensor now properly subscribes and unsubscribes to bus events and is guaranteed to be registered in `hass.data` before services are called.
+- `async_will_remove_from_hass` removes bus listeners to avoid callback leaks on unload.
+
+---
+
+## [1.1.3] - 2025-11-15
+
+### Added
+- Integration option to configure the global default download timeout via the UI. The global `download_timeout` is overridable per-service-call with the `timeout` parameter.
+- New namespaced event `media_downloader_job_interrupted` emitted alongside the existing `job_interrupted` event for clearer integration-scoped event naming.
+- Unit tests covering timeout behaviour and the `sensor.media_downloader_status` `last_job` attribute added to CI.
+
+### Improved
+- Blocking post-processing steps (normalization, thumbnail, resize) now run in a thread executor to avoid blocking the event loop.
+
+---
+
+## [1.1.2] - 2025-11-14
+
+### Added
+- Configurable timeout for the download workflow: `media_downloader.download_file` accepts a `timeout` field (seconds, default 300). The timeout applies to the entire workflow (download + post-processing + move/replace).
+- New event `job_interrupted` emitted when a job does not complete within the configured timeout. Payload: `{ "job": { "url": <url>, "path": <path> } }`.
+- Sensor enhancement: `sensor.media_downloader_status` now exposes a new attribute `last_job` with values `null`, `"done"`, or `"interrupted"`.
+
+---
+
+## [1.1.1] - 2025-10-14
+
+### Added
+- New logo and icon images.
+
+---
+
+## [1.1.0] - 2025-10-04
+
+### Added
+- New video post-processing pipeline for Telegram compatibility:
+  - Automatic **aspect ratio normalization** using `setsar=1,setdar=width/height`.
+  - Automatic **thumbnail generation and embedding** for all downloaded videos.
+  - New helper module `video_utils.py` with `normalize_video_aspect()`, `embed_thumbnail()`, `resize_video()`, and `get_video_dimensions()`.
+- New events: `media_downloader_aspect_normalized`, `media_downloader_thumbnail_embedded`.
+
+---
+
+## [1.0.10] - 2025-09-30
+
+### Added
+- Automatic thumbnail embedding for all downloaded videos using `ffmpeg`. Runs regardless of whether resizing is enabled.
+
+### Fixed
+- Prevents Telegram and other clients from generating square or distorted thumbnails by always embedding a correct thumbnail.
+
+---
+
+## [1.0.9] - 2025-09-25
+
+### Fixed
+- Corrected an issue where some videos appeared square in Telegram despite having correct pixel dimensions. The resize process now explicitly forces `scale=width:height`, `setsar=1`, and `setdar=width/height` to preserve the correct display aspect ratio.
+
+---
+
+## [1.0.8] - 2025-09-24
+
+### Changed
+- Improved robustness of video dimension detection: now uses `ffprobe` with JSON output as the primary method, with `ffmpeg -i` as a fallback. Added logging for troubleshooting when detection fails.
+
+---
+
+## [1.0.7] - 2025-09-19
+
+### Added
+- New event `media_downloader_job_completed` fired when a full job (download + optional resize) has finished successfully. Fields: `url`, `path`, `resized` (boolean).
+
+---
+
+## [1.0.6] - 2025-09-12
+
+### Added
+- New events: `media_downloader_download_completed` (fields: `url`, `path`, `resized`), `media_downloader_download_failed` (fields: `url`, `error`), `media_downloader_resize_completed` (fields: `path`, `width`, `height`), `media_downloader_resize_failed` (fields: `path`, `width`, `height`).
+- Added `icon.png` and `logo.png`.
+
+---
+
+## [1.0.5] - 2025-09-06
+
+### Added
+- Persistent sensor `sensor.media_downloader_status` via `sensor.py`.
+  - State: `idle` or `working`.
+  - Attributes: `last_changed`, `subprocess`, `active_processes`.
+  - Supports chained processes: remains `working` until all subprocesses complete.
+
+### Removed
+- Event-based status notifications replaced by the persistent sensor.
+
+---
+
+## [1.0.4] - 2025-09-03
+
+### Added
+- New service fields for `media_downloader.download_file`: `resize_enabled` (boolean), `resize_width` (int), `resize_height` (int).
+- Downloaded videos are resized if `resize_enabled` is true and dimensions differ from the target.
+- `media_downloader_download_completed` event now includes a `resized` boolean field.
+
+---
+
+## [1.0.3] - 2025-09-03
+
+### Added
+- Enhanced `services.yaml` with `name` and `description` metadata for all service fields, improving the Home Assistant automation editor UI.
+
+### Fixed
+- Resolved issue where `delete_file` and `delete_files_in_directory` services did not respond correctly when no `path` field was provided.
+
+---
+
+## [1.0.2] - 2025-08-23
+
+### Added
+- New service `media_downloader.delete_file`: deletes a specific file by `path` or a default path configured in the UI.
+- New service `media_downloader.delete_files_in_directory`: deletes all files inside a directory by `path` or a default path configured in the UI.
+- New events: `media_downloader_delete_completed`, `media_downloader_delete_directory_completed`.
+- UI OptionsFlow support: configure default file path and directory path for delete services.
+
+---
+
+## [1.0.1] - 2025-08-23
+
+### Added
+- New service `media_downloader.delete_file` (path-based deletion).
+- New service `media_downloader.delete_files_in_directory`.
+- Events: `media_downloader_delete_completed`, `media_downloader_delete_directory_completed`.
+
+---
+
+## [1.0.0] - 2025-08-22
+
+### Added
+- Initial release of **Media Downloader** as a custom Home Assistant integration.
+- UI-based configuration: base download directory and overwrite policy.
+- Service `media_downloader.download_file` with optional subdirectories, custom filenames, overwrite control, and per-download timeout.
+- Events: `media_downloader_download_started`, `media_downloader_download_completed` (with `success` and `error` fields).
+
+[1.2.0]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.6...v1.2.0
+[1.1.6]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.5...v1.1.6
+[1.1.5]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.4...v1.1.5
+[1.1.4]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.10...v1.1.0
+[1.0.10]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.9...v1.0.10
+[1.0.9]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.8...v1.0.9
+[1.0.8]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.7...v1.0.8
+[1.0.7]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.6...v1.0.7
+[1.0.6]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.5...v1.0.6
+[1.0.5]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.4...v1.0.5
+[1.0.4]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/Geek-MD/Advanced_Downloader/releases/tag/v1.0.0
