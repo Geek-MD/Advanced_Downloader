@@ -1,4 +1,4 @@
-"""Main logic for Media Downloader integration."""
+"""Main logic for Advanced Downloader integration."""
 
 from __future__ import annotations
 
@@ -50,23 +50,51 @@ from .video_utils import (
     sanitize_filename,
     guess_filename_from_url,
     ensure_within_base,
-    normalize_video_aspect,
-    embed_thumbnail,
-    resize_video,
-    get_video_dimensions,
 )
+
+from custom_components.video_normalizer.video_processor import VideoProcessor
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[str] = ["sensor"]
 
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".avi"}
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Media Downloader from a config entry."""
+    """Set up Advanced Downloader from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     )
+
+    # Warn if Video Normalizer is also configured as a standalone integration.
+    # Its code must remain installed (Advanced Downloader imports from it), but
+    # the standalone config entry should be removed to avoid duplicate processing.
+    if hass.config_entries.async_entries("video_normalizer"):
+        _LOGGER.warning(
+            "Video Normalizer is configured as a standalone integration alongside "
+            "Advanced Downloader. Remove its config entry from Settings → Devices & "
+            "Services to avoid duplicate video processing. Keep the HACS package "
+            "installed — Advanced Downloader still requires its code."
+        )
+        from homeassistant.components import persistent_notification as _pn  # noqa: PLC0415
+        _pn.async_create(
+            hass,
+            (
+                "**Video Normalizer** is installed as a standalone integration, but it "
+                "is now used as a dependency by **Advanced Downloader**.\n\n"
+                "To avoid duplicate video processing, please remove the Video Normalizer "
+                "configuration entry:\n"
+                "**Settings → Devices & Services → Video Normalizer → Delete**\n\n"
+                "⚠️ Do **not** uninstall the HACS package — Advanced Downloader still "
+                "requires its code."
+            ),
+            title="Advanced Downloader: Remove standalone Video Normalizer",
+            notification_id="advanced_downloader_video_normalizer_conflict",
+        )
+
+    video_processor = VideoProcessor()
 
     @callback
     def _get_config() -> tuple[Path, bool]:
@@ -130,43 +158,62 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             os.replace(tmp_path, dest_path)
 
-            hass.bus.async_fire("media_downloader_download_completed", {
+            hass.bus.async_fire("advanced_downloader_download_completed", {
                 "url": url, "path": str(dest_path)
             })
 
-            # Always normalize aspect and embed thumbnail
-            if normalize_video_aspect(dest_path):
-                hass.bus.async_fire("media_downloader_aspect_normalized", {
-                    "path": str(dest_path)
-                })
-
-            if embed_thumbnail(dest_path):
-                hass.bus.async_fire("media_downloader_thumbnail_embedded", {
-                    "path": str(dest_path)
-                })
-
-            # Optional resize
-            if resize_enabled and dest_path.suffix.lower() in [".mp4", ".mov", ".mkv", ".avi"]:
-                w, h = get_video_dimensions(dest_path)
-                if w != resize_width or h != resize_height:
+            # Delegate video processing (aspect normalization, thumbnail embedding,
+            # optional resize) to Video Normalizer
+            if dest_path.suffix.lower() in VIDEO_EXTENSIONS:
+                if resize_enabled:
                     sensor.start_process(PROCESS_RESIZING)
-                    if resize_video(dest_path, resize_width, resize_height):
-                        hass.bus.async_fire("media_downloader_resize_completed", {
-                            "path": str(dest_path), "width": resize_width, "height": resize_height
-                        })
-                    else:
-                        hass.bus.async_fire("media_downloader_resize_failed", {
+                try:
+                    process_result = await video_processor.process_video(
+                        video_path=str(dest_path),
+                        overwrite=True,
+                        normalize_aspect=True,
+                        generate_thumbnail=True,
+                        resize_width=resize_width if resize_enabled else None,
+                        resize_height=resize_height if resize_enabled else None,
+                    )
+                    operations = process_result.get("operations", {})
+
+                    if operations.get("normalize_aspect"):
+                        hass.bus.async_fire("advanced_downloader_aspect_normalized", {
                             "path": str(dest_path)
                         })
-                    sensor.end_process(PROCESS_RESIZING)
 
-            hass.bus.async_fire("media_downloader_job_completed", {
+                    if operations.get("embed_thumbnail"):
+                        hass.bus.async_fire("advanced_downloader_thumbnail_embedded", {
+                            "path": str(dest_path)
+                        })
+
+                    if resize_enabled:
+                        if operations.get("resize"):
+                            hass.bus.async_fire("advanced_downloader_resize_completed", {
+                                "path": str(dest_path),
+                                "width": resize_width,
+                                "height": resize_height,
+                            })
+                        elif "resize" in operations and not operations["resize"]:
+                            hass.bus.async_fire("advanced_downloader_resize_failed", {
+                                "path": str(dest_path)
+                            })
+
+                    temp_files = process_result.get("temp_files", [])
+                    if temp_files:
+                        await video_processor.cleanup_temp_files(temp_files)
+                finally:
+                    if resize_enabled:
+                        sensor.end_process(PROCESS_RESIZING)
+
+            hass.bus.async_fire("advanced_downloader_job_completed", {
                 "url": url, "path": str(dest_path)
             })
 
         except Exception as err:
             _LOGGER.error("Download failed: %s", err)
-            hass.bus.async_fire("media_downloader_download_failed", {
+            hass.bus.async_fire("advanced_downloader_download_failed", {
                 "url": url, "error": str(err)
             })
         finally:
@@ -177,7 +224,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # ----------------------------------------------------------
 
     async def _async_delete_file(call: ServiceCall) -> None:
-        path_str: str = call.data.get(ATTR_PATH)
+        path_str: str | None = call.data.get(ATTR_PATH)
         if not path_str:
             path_str = entry.options.get(CONF_DELETE_FILE_PATH, "")
         if not path_str:
@@ -196,7 +243,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             sensor.end_process(PROCESS_FILE_DELETING)
 
     async def _async_delete_directory(call: ServiceCall) -> None:
-        dir_str: str = call.data.get(ATTR_PATH)
+        dir_str: str | None = call.data.get(ATTR_PATH)
         if not dir_str:
             dir_str = entry.options.get(CONF_DELETE_DIR_PATH, "")
         if not dir_str:

@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'custom_components/media_downloader/manifest.json'
+      - 'custom_components/advanced_downloader/manifest.json'
 
 jobs:
   release:
@@ -23,7 +23,7 @@ jobs:
       - name: Get version from manifest
         id: get_version
         run: |
-          VERSION=$(jq -r '.version' custom_components/media_downloader/manifest.json)
+          VERSION=$(jq -r '.version' custom_components/advanced_downloader/manifest.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"

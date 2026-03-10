@@ -1,4 +1,4 @@
-DOMAIN = "media_downloader"
+DOMAIN = "advanced_downloader"
 
 CONF_DOWNLOAD_DIR = "download_dir"
 CONF_OVERWRITE = "overwrite"

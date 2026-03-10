@@ -31,7 +31,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA)
 
-        title = f"Media Downloader ({user_input[CONF_DOWNLOAD_DIR]})"
+        title = f"Advanced Downloader ({user_input[CONF_DOWNLOAD_DIR]})"
         return self.async_create_entry(title=title, data=user_input)
 
     @staticmethod

@@ -1,76 +1,86 @@
-[![Geek-MD - Media Downloader](https://img.shields.io/static/v1?label=Geek-MD&message=Media%20Downloader&color=blue&logo=github)](https://github.com/Geek-MD/Media_Downloader)
-[![Stars](https://img.shields.io/github/stars/Geek-MD/Media_Downloader?style=social)](https://github.com/Geek-MD/Media_Downloader)
-[![Forks](https://img.shields.io/github/forks/Geek-MD/Media_Downloader?style=social)](https://github.com/Geek-MD/Media_Downloader)
+[![Geek-MD - Advanced Downloader](https://img.shields.io/static/v1?label=Geek-MD&message=Advanced%20Downloader&color=blue&logo=github)](https://github.com/Geek-MD/Advanced_Downloader)
+[![Stars](https://img.shields.io/github/stars/Geek-MD/Advanced_Downloader?style=social)](https://github.com/Geek-MD/Advanced_Downloader)
+[![Forks](https://img.shields.io/github/forks/Geek-MD/Advanced_Downloader?style=social)](https://github.com/Geek-MD/Advanced_Downloader)
 
-[![GitHub Release](https://img.shields.io/github/release/Geek-MD/Media_Downloader?include_prereleases&sort=semver&color=blue)](https://github.com/Geek-MD/Media_Downloader/releases)
-[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/Geek-MD/Media_Downloader/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/Geek-MD/Advanced_Downloader?include_prereleases&sort=semver&color=blue)](https://github.com/Geek-MD/Advanced_Downloader/releases)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/Geek-MD/Advanced_Downloader/blob/main/LICENSE)
 [![HACS Custom Repository](https://img.shields.io/badge/HACS-Custom%20Repository-blue)](https://hacs.xyz/)
 
-[![Ruff + Mypy + Hassfest](https://github.com/Geek-MD/Media_Downloader/actions/workflows/validate.yml/badge.svg)](https://github.com/Geek-MD/Media_Downloader/actions/workflows/validate.yml)
+[![Ruff + Mypy + Hassfest](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml/badge.svg)](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
-<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Media_Downloader/blob/main/logo.png?raw=true" />
+<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Advanced_Downloader/blob/main/logo.png?raw=true" />
 
-# Media Downloader
+# Advanced Downloader
 
-**Media Downloader** is a custom Home Assistant integration that allows you to download, normalize, and manage media files directly from Home Assistant through simple services.
+**Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
+
+> **Domain:** `advanced_downloader`  
+> This integration coexists with the core `downloader` integration. If you no longer need the core `downloader`, remove `downloader:` from your `configuration.yaml`.
 
 ---
 
 ## ✨ Features
-- Download files from any URL directly into a configured folder.  
-- Optional subdirectories and custom filenames.  
-- Overwrite policy (default or per call).  
-- Delete a single file or all files in a directory via services.  
-- **Automatic aspect ratio normalization** for all downloaded videos to prevent square or distorted previews in Telegram and mobile players.  
-- **Automatic thumbnail generation and embedding** to force Telegram to use the correct video preview.  
-- Optional video resizing subprocess (width/height) if dimensions differ.  
-- Robust detection of video dimensions using `ffprobe` (JSON) with `ffmpeg -i` fallback.  
-- Persistent status sensor (`sensor.media_downloader_status`) to track operations (`idle` / `working`).  
-- Event support for all processes: download, normalize, thumbnail, resize, and job completion.  
+- Download files from any URL directly into a configured folder.
+- Optional subdirectories and custom filenames.
+- Overwrite policy (default or per-call).
+- Delete a single file or all files in a directory via services.
+- **Automatic aspect ratio normalization** for downloaded videos (powered by Video Normalizer).
+- **Automatic thumbnail generation and embedding** for correct video previews in Telegram and mobile players.
+- Optional video resizing (width/height) if dimensions differ.
+- Persistent status sensor (`sensor.advanced_downloader_status`) to track operations (`idle` / `working`).
+- Event support for all processes: download, normalize, thumbnail, resize, and job completion.
 - Fully compatible with automations and scripts in Home Assistant.
 
 ---
 
+## 🧩 Dependencies
+- [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) — required for video processing (aspect normalization, thumbnail embedding, resizing). Install it via HACS before adding Advanced Downloader.
+
+---
+
 ## 🧰 Requirements
-- Home Assistant 2024.1.0 or newer.  
-- A valid writable directory for storing media files (e.g., `/media` or `/config/media`).  
-- `ffmpeg` and `ffprobe` must be installed and available in the system path for resizing, normalization, and thumbnail embedding.
+- Home Assistant 2024.1.0 or newer.
+- A valid writable directory for storing media files (e.g., `/media` or `/config/media`).
+- `ffmpeg` and `ffprobe` must be installed and available in the system path.
+- [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) installed as a HACS integration.
 
 ---
 
 ## ⚙️ Installation
 
 ### Option 1: Manual Installation
-1. Download the latest release from [GitHub](https://github.com/Geek-MD/Media_Downloader/releases).  
-2. Copy the folder `media_downloader` into:  
+1. Install [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) first.
+2. Download the latest release from [GitHub](https://github.com/Geek-MD/Advanced_Downloader/releases).
+3. Copy the folder `advanced_downloader` into:
    ```
-   /config/custom_components/media_downloader/
+   /config/custom_components/advanced_downloader/
    ```
-3. Restart Home Assistant.  
-4. Add the integration from **Settings → Devices & Services → Add Integration → Media Downloader**.
+4. Restart Home Assistant.
+5. Add the integration from **Settings → Devices & Services → Add Integration → Advanced Downloader**.
 
 ---
 
 ### Option 2: HACS Installation
-1. Go to **HACS → Integrations → Custom Repositories**.  
-2. Add the repository URL:  
+1. Install [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) via HACS first.
+2. Go to **HACS → Integrations → Custom Repositories**.
+3. Add the repository URL:
    ```
-   https://github.com/Geek-MD/Media_Downloader
+   https://github.com/Geek-MD/Advanced_Downloader
    ```
-3. Select **Integration** as category.  
-4. Install **Media Downloader** from HACS.  
-5. Restart Home Assistant.  
-6. Add the integration from **Settings → Devices & Services → Add Integration → Media Downloader**.
+4. Select **Integration** as category.
+5. Install **Advanced Downloader** from HACS.
+6. Restart Home Assistant.
+7. Add the integration from **Settings → Devices & Services → Add Integration → Advanced Downloader**.
 
 ---
 
 ## ⚙️ Configuration
 When adding the integration:
-- **Base download directory** → Absolute path where files will be saved.  
-- **Overwrite** → Whether existing files should be replaced by default.  
-- **Default file delete path** → Optional fallback for the `delete_file` service.  
+- **Base download directory** → Absolute path where files will be saved.
+- **Overwrite** → Whether existing files should be replaced by default.
+- **Default file delete path** → Optional fallback for the `delete_file` service.
 - **Default directory delete path** → Optional fallback for the `delete_files_in_directory` service.
 
 You can modify these settings later via the integration options.
@@ -79,12 +89,12 @@ You can modify these settings later via the integration options.
 
 ## 🧩 Services
 
-### 1. `media_downloader.download_file`
-Downloads a file from a given URL.  
-For video files:
-1. **Always normalizes aspect ratio** (`setsar=1,setdar=width/height`).  
-2. **Always embeds a thumbnail** (prevents Telegram from creating square previews).  
-3. **Optionally resizes** if `resize_enabled: true` and the dimensions differ.
+### 1. `advanced_downloader.download_file`
+Downloads a file from a given URL.
+For video files, the following steps are always performed via Video Normalizer:
+1. **Aspect ratio normalization** (`setsar=1,setdar=width/height`).
+2. **Thumbnail generation and embedding** (ensures correct previews in Telegram and other platforms).
+3. **Optional resize** if `resize_enabled: true`.
 
 #### Service Data
 | Field | Required | Description |
@@ -99,8 +109,8 @@ For video files:
 | `resize_height` | no | Target height for resize (default 360). |
 
 #### Example:
-```
-- service: media_downloader.download_file
+```yaml
+- service: advanced_downloader.download_file
   data:
     url: "https://example.com/video.mp4"
     subdir: "ring"
@@ -112,8 +122,8 @@ For video files:
 
 ---
 
-### 2. `media_downloader.delete_file`
-Deletes a single file.  
+### 2. `advanced_downloader.delete_file`
+Deletes a single file.
 If no `path` is provided, the default UI-configured path will be used.
 
 | Field | Required | Description |
@@ -122,8 +132,8 @@ If no `path` is provided, the default UI-configured path will be used.
 
 ---
 
-### 3. `media_downloader.delete_files_in_directory`
-Deletes all files inside a directory.  
+### 3. `advanced_downloader.delete_files_in_directory`
+Deletes all files inside a directory.
 If no `path` is provided, the default UI-configured directory will be used.
 
 | Field | Required | Description |
@@ -134,18 +144,18 @@ If no `path` is provided, the default UI-configured directory will be used.
 
 ## 📊 Sensor
 
-The integration provides the persistent entity:  
-**`sensor.media_downloader_status`**
+The integration provides the persistent entity:
+**`sensor.advanced_downloader_status`**
 
 ### State
-- `idle` → No active processes.  
-- `working` → At least one active process (download, normalize, thumbnail, resize, or delete).  
+- `idle` → No active processes.
+- `working` → At least one active process (download, normalize, thumbnail, resize, or delete).
 
 ### Attributes
 | Attribute | Description |
 |------------|-------------|
 | `last_changed` | Datetime when state last changed. |
-| `subprocess` | Current subprocess name (`downloading`, `normalizing`, `thumbnail`, `resizing`, `file_deleting`, `dir_deleting`). |
+| `subprocess` | Current subprocess name (`downloading`, `resizing`, `file_deleting`, `dir_deleting`). |
 | `active_processes` | List of all currently active subprocesses. |
 
 ---
@@ -154,20 +164,20 @@ The integration provides the persistent entity:
 
 | Event Name | Triggered When | Data Fields |
 |-------------|----------------|--------------|
-| `media_downloader_download_completed` | Download finished successfully. | `url`, `path` |
-| `media_downloader_aspect_normalized` | Video aspect normalized successfully. | `path` |
-| `media_downloader_thumbnail_embedded` | Thumbnail successfully generated and embedded. | `path` |
-| `media_downloader_resize_completed` | Video resized successfully. | `path`, `width`, `height` |
-| `media_downloader_resize_failed` | Resize process failed. | `path` |
-| `media_downloader_download_failed` | Download failed. | `url`, `error` |
-| `media_downloader_job_completed` | Entire workflow completed. | `url`, `path` |
+| `advanced_downloader_download_completed` | Download finished successfully. | `url`, `path` |
+| `advanced_downloader_aspect_normalized` | Video aspect normalized successfully. | `path` |
+| `advanced_downloader_thumbnail_embedded` | Thumbnail successfully generated and embedded. | `path` |
+| `advanced_downloader_resize_completed` | Video resized successfully. | `path`, `width`, `height` |
+| `advanced_downloader_resize_failed` | Resize process failed. | `path` |
+| `advanced_downloader_download_failed` | Download failed. | `url`, `error` |
+| `advanced_downloader_job_completed` | Entire workflow completed. | `url`, `path` |
 
 ---
 
 ## 🤖 Example Automation
 
-```
-- service: media_downloader.download_file
+```yaml
+- service: advanced_downloader.download_file
   data:
     url: "https://example.com/camera/video.mp4"
     subdir: "ring"
@@ -178,7 +188,7 @@ The integration provides the persistent entity:
 
 - wait_for_trigger:
     - platform: event
-      event_type: media_downloader_job_completed
+      event_type: advanced_downloader_job_completed
   timeout: "00:05:00"
   continue_on_timeout: true
 
@@ -196,8 +206,14 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
+## 📋 Changelog
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
+
+---
+
 <div align="center">
-  
+
 💻 **Proudly developed with GitHub Copilot** 🚀
 
 </div>
+
