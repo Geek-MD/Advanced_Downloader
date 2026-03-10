@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **[Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) is now a required dependency.** All video post-processing (aspect ratio normalization, thumbnail generation/embedding, and optional resizing) is delegated to Video Normalizer's `VideoProcessor`, eliminating duplicated logic.
 - **Startup conflict detection:** if Video Normalizer is also configured as a standalone integration, a persistent Home Assistant notification is created to guide the user to remove that config entry (while keeping the HACS package installed, since Advanced Downloader still requires its code).
 - `issue_tracker` field added to `manifest.json`.
+- Brand images (`icon.png`, `icon@2x.png`, `logo.png`, `logo@2x.png`) added to `custom_components/advanced_downloader/brands/`.
 
 ### Changed
 - **Integration renamed** from *Media Downloader* to *Advanced Downloader*.
