@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.2] - 2026-03-10
+
+### Fixed
+- Renamed brand images directory from `custom_components/advanced_downloader/brands/` to `custom_components/advanced_downloader/brand/` to match the standard Home Assistant brands directory name.
+
+### Removed
+- Automatic release GitHub Action (`.github/workflows/release.yml`). Releases are now created manually.
+
+---
+
 ## [1.2.1] - 2026-03-10
 
 ### Added
@@ -28,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **[Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) is now a required dependency.** All video post-processing (aspect ratio normalization, thumbnail generation/embedding, and optional resizing) is delegated to Video Normalizer's `VideoProcessor`, eliminating duplicated logic.
 - **Startup conflict detection:** if Video Normalizer is also configured as a standalone integration, a persistent Home Assistant notification is created to guide the user to remove that config entry (while keeping the HACS package installed, since Advanced Downloader still requires its code).
 - `issue_tracker` field added to `manifest.json`.
-- Brand images (`icon.png`, `icon@2x.png`, `logo.png`, `logo@2x.png`) added to `custom_components/advanced_downloader/brands/`.
+- Brand images (`icon.png`, `icon@2x.png`, `logo.png`, `logo@2x.png`) added to `custom_components/advanced_downloader/brand/`.
 
 ### Changed
 - **Integration renamed** from *Media Downloader* to *Advanced Downloader*.
@@ -205,6 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service `media_downloader.download_file` with optional subdirectories, custom filenames, overwrite control, and per-download timeout.
 - Events: `media_downloader_download_started`, `media_downloader_download_completed` (with `success` and `error` fields).
 
+[1.2.2]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.6...v1.2.0
 [1.1.6]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.5...v1.1.6
