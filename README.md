@@ -10,7 +10,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
-<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Advanced_Downloader/blob/main/logo.png?raw=true" />
+<img width="200" height="200" alt="image" src="https://github.com/Geek-MD/Advanced_Downloader/blob/main/custom_components/advanced_downloader/brand/icon.png?raw=true" />
 
 # Advanced Downloader
 
