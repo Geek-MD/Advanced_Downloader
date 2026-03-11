@@ -14,7 +14,7 @@
 
 # Advanced Downloader
 
-**Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) as a dependency for all video processing.
+**Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Tools](https://github.com/Geek-MD/Video_Tools) as a dependency for all video processing.
 
 > **Domain:** `advanced_downloader`  
 > Advanced Downloader is a full superset of the core `downloader` integration. If you have `downloader:` in your `configuration.yaml`, a persistent notification will appear at startup reminding you to remove it. After removing it, restart Home Assistant.
@@ -26,7 +26,7 @@
 - Optional subdirectories and custom filenames.
 - Overwrite policy (default or per-call).
 - Delete a single file or all files in a directory via services.
-- **Automatic aspect ratio normalization** for downloaded videos (powered by Video Normalizer).
+- **Automatic aspect ratio normalization** for downloaded videos (powered by Video Tools).
 - **Automatic thumbnail generation and embedding** for correct video previews in Telegram and mobile players.
 - Optional video resizing (width/height) if dimensions differ.
 - Persistent status sensor (`sensor.advanced_downloader_status`) to track operations (`idle` / `working`).
@@ -36,7 +36,7 @@
 ---
 
 ## 🧩 Dependencies
-- [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) — required for video processing (aspect normalization, thumbnail embedding, resizing). Install it via HACS before adding Advanced Downloader.
+- [Video Tools](https://github.com/Geek-MD/Video_Tools) — required for video processing (aspect normalization, thumbnail embedding, resizing). Install it via HACS before adding Advanced Downloader.
 
 ---
 
@@ -44,14 +44,14 @@
 - Home Assistant 2024.1.0 or newer.
 - A valid writable directory for storing media files (e.g., `/media` or `/config/media`).
 - `ffmpeg` and `ffprobe` must be installed and available in the system path.
-- [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) installed as a HACS integration.
+- [Video Tools](https://github.com/Geek-MD/Video_Tools) installed as a HACS integration.
 
 ---
 
 ## ⚙️ Installation
 
 ### Option 1: Manual Installation
-1. Install [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) first.
+1. Install [Video Tools](https://github.com/Geek-MD/Video_Tools) first.
 2. Download the latest release from [GitHub](https://github.com/Geek-MD/Advanced_Downloader/releases).
 3. Copy the folder `advanced_downloader` into:
    ```
@@ -63,7 +63,7 @@
 ---
 
 ### Option 2: HACS Installation
-1. Install [Video Normalizer](https://github.com/Geek-MD/Video_Normalizer) via HACS first.
+1. Install [Video Tools](https://github.com/Geek-MD/Video_Tools) via HACS first.
 2. Go to **HACS → Integrations → Custom Repositories**.
 3. Add the repository URL:
    ```
@@ -91,7 +91,7 @@ You can modify these settings later via the integration options.
 
 ### 1. `advanced_downloader.download_file`
 Downloads a file from a given URL.
-For video files, the following steps are always performed via Video Normalizer:
+For video files, the following steps are always performed via Video Tools:
 1. **Aspect ratio normalization** (`setsar=1,setdar=width/height`).
 2. **Thumbnail generation and embedding** (ensures correct previews in Telegram and other platforms).
 3. **Optional resize** if `resize_enabled: true`.
@@ -107,7 +107,7 @@ For video files, the following steps are always performed via Video Normalizer:
 | `resize_enabled` | no | If true, resize the video when dimensions mismatch. |
 | `resize_width` | no | Target width for resize (default 640). |
 | `resize_height` | no | Target height for resize (default 360). |
-| `target_aspect_ratio` | no | Target display aspect ratio as decimal (e.g. `1.777` for 16:9). Passed to Video Normalizer during normalization. Omit to let Video Normalizer infer from the video's own dimensions. |
+| `target_aspect_ratio` | no | Target display aspect ratio as decimal (e.g. `1.777` for 16:9). Passed to Video Tools during normalization. Omit to let Video Tools infer from the video's own dimensions. |
 
 #### Example:
 ```yaml
@@ -208,7 +208,7 @@ The integration provides the persistent entity:
 ### Migrating from `downloader` + `video_normalizer` automations
 
 If you previously had automations that combined the core **Downloader** integration
-(`downloader.download_file`) with the standalone **Video Normalizer** integration
+(`downloader.download_file`) with the standalone **Video Tools** integration
 (`video_normalizer.normalize_video`), follow this guide to migrate them to
 **Advanced Downloader**, which performs both operations in a single service call.
 
@@ -229,7 +229,7 @@ If you previously had automations that combined the core **Downloader** integrat
       event_type: downloader_download_completed
   continue_on_timeout: false
 
-# 3. Normalize the video using the standalone Video Normalizer integration
+# 3. Normalize the video using the standalone Video Tools integration
 - action: video_normalizer.normalize_video
   data:
     overwrite: true
@@ -238,7 +238,7 @@ If you previously had automations that combined the core **Downloader** integrat
     input_file_path: /media/ring/ring.mp4
     target_aspect_ratio: 1.777
 
-# 4. Wait for Video Normalizer to finish (poll the sensor)
+# 4. Wait for Video Tools to finish (poll the sensor)
 - if:
     - condition: state
       entity_id: sensor.video_normalizer_status
@@ -277,7 +277,7 @@ If you previously had automations that combined the core **Downloader** integrat
     subdir: ring
     filename: ring.mp4
     overwrite: true
-    target_aspect_ratio: 1.777   # forwarded to Video Normalizer
+    target_aspect_ratio: 1.777   # forwarded to Video Tools
 
 # 2. Wait for job completion (success) or failure
 - wait_for_trigger:
