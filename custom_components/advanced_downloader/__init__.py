@@ -54,7 +54,7 @@ from .video_utils import (
     ensure_within_base,
 )
 
-from custom_components.video_normalizer.video_processor import VideoProcessor
+from custom_components.video_tools.video_processor import VideoProcessor
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[str] = ["sensor"]
@@ -106,12 +106,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async_at_start(hass, _check_downloader_conflict)
 
-    # Warn if Video Normalizer is also configured as a standalone integration.
+    # Warn if Video Tools is also configured as a standalone integration.
     # Its code must remain installed (Advanced Downloader imports from it), but
     # the standalone config entry should be removed to avoid duplicate processing.
-    if hass.config_entries.async_entries("video_normalizer"):
+    if hass.config_entries.async_entries("video_tools"):
         _LOGGER.warning(
-            "Video Normalizer is configured as a standalone integration alongside "
+            "Video Tools is configured as a standalone integration alongside "
             "Advanced Downloader. Remove its config entry from Settings → Devices & "
             "Services to avoid duplicate video processing. Keep the HACS package "
             "installed — Advanced Downloader still requires its code."
@@ -119,16 +119,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _pn.async_create(
             hass,
             (
-                "**Video Normalizer** is installed as a standalone integration, but it "
+                "**Video Tools** is installed as a standalone integration, but it "
                 "is now used as a dependency by **Advanced Downloader**.\n\n"
-                "To avoid duplicate video processing, please remove the Video Normalizer "
+                "To avoid duplicate video processing, please remove the Video Tools "
                 "configuration entry:\n"
-                "**Settings → Devices & Services → Video Normalizer → Delete**\n\n"
+                "**Settings → Devices & Services → Video Tools → Delete**\n\n"
                 "⚠️ Do **not** uninstall the HACS package — Advanced Downloader still "
                 "requires its code."
             ),
-            title="Advanced Downloader: Remove standalone Video Normalizer",
-            notification_id="advanced_downloader_video_normalizer_conflict",
+            title="Advanced Downloader: Remove standalone Video Tools",
+            notification_id="advanced_downloader_video_tools_conflict",
         )
 
     video_processor = VideoProcessor()
@@ -201,7 +201,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             })
 
             # Delegate video processing (aspect normalization, thumbnail embedding,
-            # optional resize) to Video Normalizer
+            # optional resize) to Video Tools
             if dest_path.suffix.lower() in VIDEO_EXTENSIONS:
                 if resize_enabled:
                     sensor.start_process(PROCESS_RESIZING)
