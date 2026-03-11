@@ -74,24 +74,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Warn if the core "downloader" integration is loaded (configured via
     # configuration.yaml). Advanced Downloader is a full superset of its
     # functionality; having both active serves no purpose and may cause confusion.
-    if "downloader" in hass.config.components:
-        _LOGGER.warning(
-            "The built-in 'downloader' integration is active alongside Advanced "
-            "Downloader. Remove 'downloader:' from your configuration.yaml and "
-            "restart Home Assistant to avoid redundancy."
-        )
-        _pn.async_create(
-            hass,
-            (
-                "The built-in **Downloader** integration is loaded in your "
-                "configuration. **Advanced Downloader** provides a full superset of "
-                "its functionality.\n\n"
-                "To avoid redundancy, remove `downloader:` from your "
-                "`configuration.yaml` and restart Home Assistant."
-            ),
-            title="Advanced Downloader: Remove core Downloader integration",
-            notification_id="advanced_downloader_core_downloader_conflict",
-        )
+    #
+    # The check is deferred until HA has fully started so that all YAML-configured
+    # integrations have had a chance to register their services. We test for a
+    # registered service rather than inspecting hass.config.components, because
+    # hass.config.components may contain "downloader" even when the integration is
+    # not explicitly configured (e.g. available built-in integrations are scanned
+    # at boot). A service is only registered after a successful async_setup(), so
+    # this is a reliable indicator that downloader: is present in configuration.yaml.
+    @callback
+    def _check_downloader_conflict(_: HomeAssistant) -> None:
+        if "downloader" in hass.services.async_services():
+            _LOGGER.warning(
+                "The built-in 'downloader' integration is active alongside Advanced "
+                "Downloader. Remove 'downloader:' from your configuration.yaml and "
+                "restart Home Assistant to avoid redundancy."
+            )
+            _pn.async_create(
+                hass,
+                (
+                    "The built-in **Downloader** integration is loaded in your "
+                    "configuration. **Advanced Downloader** provides a full superset of "
+                    "its functionality.\n\n"
+                    "To avoid redundancy, remove `downloader:` from your "
+                    "`configuration.yaml` and restart Home Assistant."
+                ),
+                title="Advanced Downloader: Remove core Downloader integration",
+                notification_id="advanced_downloader_core_downloader_conflict",
+            )
+
+    hass.async_at_start(_check_downloader_conflict)
 
     # Warn if Video Normalizer is also configured as a standalone integration.
     # Its code must remain installed (Advanced Downloader imports from it), but
