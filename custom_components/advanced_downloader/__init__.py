@@ -13,6 +13,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import aiohttp_client, config_validation as cv
+from homeassistant.helpers.start import async_at_start
 from homeassistant.exceptions import HomeAssistantError
 
 # Handle asyncio.timeout availability (Python 3.11+)
@@ -103,7 +104,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 notification_id="advanced_downloader_core_downloader_conflict",
             )
 
-    hass.async_at_start(_check_downloader_conflict)
+    async_at_start(hass, _check_downloader_conflict)
 
     # Warn if Video Normalizer is also configured as a standalone integration.
     # Its code must remain installed (Advanced Downloader imports from it), but

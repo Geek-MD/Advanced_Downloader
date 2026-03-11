@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.4] - 2026-03-11
+
+### Fixed
+- **`AttributeError: 'HomeAssistant' object has no attribute 'async_at_start'`:** replaced the invalid `hass.async_at_start()` call with the correct `homeassistant.helpers.start.async_at_start(hass, callback)` helper. This caused the entire integration setup to fail, making all services (`advanced_downloader.download_file`, etc.) unavailable.
+
+---
+
 ## [1.2.3] - 2026-03-11
 
 ### Fixed
@@ -222,6 +229,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service `media_downloader.download_file` with optional subdirectories, custom filenames, overwrite control, and per-download timeout.
 - Events: `media_downloader_download_started`, `media_downloader_download_completed` (with `success` and `error` fields).
 
+[1.2.4]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.0...v1.2.1
