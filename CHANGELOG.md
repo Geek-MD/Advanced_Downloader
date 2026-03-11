@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.3] - 2026-03-11
+
+### Fixed
+- **False-positive core Downloader conflict notification:** the check that detects whether the built-in `downloader` integration is active was incorrectly using `hass.config.components`, which can contain `"downloader"` even when `downloader:` is not present in `configuration.yaml` (HA may register available built-in integrations at boot). The check now inspects `hass.services.async_services()` instead, which only lists domains with registered services — a reliable indicator that `async_setup()` was actually called for that integration. Additionally, the check is now deferred until after HA has fully started (via `hass.async_at_start()`) to guarantee all YAML-configured integrations have had a chance to register their services before the conflict detection runs.
+
+---
+
 ## [1.2.2] - 2026-03-10
 
 ### Fixed
@@ -215,6 +222,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service `media_downloader.download_file` with optional subdirectories, custom filenames, overwrite control, and per-download timeout.
 - Events: `media_downloader_download_started`, `media_downloader_download_completed` (with `success` and `error` fields).
 
+[1.2.3]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.1.6...v1.2.0
