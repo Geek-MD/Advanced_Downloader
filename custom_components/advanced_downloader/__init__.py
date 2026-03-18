@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
+import aiofiles
 import aiohttp
 import logging
 from pathlib import Path
@@ -186,10 +187,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 async with session.get(url) as resp:
                     if resp.status != 200:
                         raise HomeAssistantError(f"HTTP error {resp.status}: {url}")
-                    with open(tmp_path, "wb") as f:
+                    async with aiofiles.open(tmp_path, "wb") as f:
                         async for chunk in resp.content.iter_chunked(1024 * 64):
                             if chunk:
-                                f.write(chunk)
+                                await f.write(chunk)
 
             if dest_path.exists() and not do_overwrite:
                 raise HomeAssistantError(f"File exists and overwrite is False: {dest_path}")

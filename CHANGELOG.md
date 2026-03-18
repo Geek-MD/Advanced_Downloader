@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.6] - 2026-03-18
+
+### Fixed
+- **Blocking `open()` call inside the event loop:** replaced the synchronous `open(tmp_path, "wb")` used during chunk-writing with `aiofiles.open()` so that file I/O is no longer performed on the event-loop thread. This resolves the `homeassistant.util.loop` warning *"Detected blocking call to open … inside the event loop"*. `aiofiles>=23.1.0` has been added as a runtime requirement.
+
+---
+
 ## [1.2.5] - 2026-03-11
 
 ### Changed
@@ -236,6 +243,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service `media_downloader.download_file` with optional subdirectories, custom filenames, overwrite control, and per-download timeout.
 - Events: `media_downloader_download_started`, `media_downloader_download_completed` (with `success` and `error` fields).
 
+[1.2.6]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/Geek-MD/Advanced_Downloader/compare/v1.2.2...v1.2.3
