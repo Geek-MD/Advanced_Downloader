@@ -1,13 +1,15 @@
 {
   "domain": "advanced_downloader",
   "name": "Advanced Downloader",
+  "categories": ["media_entertainment"],
   "codeowners": ["@Geek-MD"],
   "config_flow": true,
   "dependencies": ["video_tools"],
   "documentation": "https://github.com/Geek-MD/Advanced_Downloader",
+  "integration_type": "service",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/Geek-MD/Advanced_Downloader/issues",
   "quality_scale": "legacy",
-  "requirements": ["aiofiles>=23.1.0"],
-  "version": "1.2.6"
+  "requirements": ["aiofiles==25.1.0"],
+  "version": "1.2.7"
 }
