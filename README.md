@@ -6,6 +6,10 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/Geek-MD/Advanced_Downloader/blob/main/LICENSE)
 [![HACS Custom Repository](https://img.shields.io/badge/HACS-Custom%20Repository-blue)](https://hacs.xyz/)
 
+<!-- ha-marketplace:exclude-start -->
+[![Open your Home Assistant instance and open Advanced Downloader in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=Geek-MD&repository=Advanced_Downloader&category=integration)
+<!-- ha-marketplace:exclude-end -->
+
 [![Ruff + Mypy + Hassfest](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml/badge.svg)](https://github.com/Geek-MD/Advanced_Downloader/actions/workflows/validate.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
@@ -15,6 +19,8 @@
 # Advanced Downloader
 
 **Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Tools](https://github.com/Geek-MD/Video_Tools) as a dependency for all video processing.
+
+Version **1.2.7** is prepared for Home Assistant 2026.11, including Marketplace metadata, an aligned `aiofiles` minimum version, and awaited platform setup.
 
 > **Domain:** `advanced_downloader`  
 > Advanced Downloader is a full superset of the core `downloader` integration. If you have `downloader:` in your `configuration.yaml`, a persistent notification will appear at startup reminding you to remove it. After removing it, restart Home Assistant.
@@ -48,21 +54,17 @@
 
 ---
 
-## ⚙️ Installation
+## 🛠 Installation
 
-### Option 1: Manual Installation
+### Option 1: Marketplace (Home Assistant 2026.11 or newer)
+
 1. Install [Video Tools](https://github.com/Geek-MD/Video_Tools) first.
-2. Download the latest release from [GitHub](https://github.com/Geek-MD/Advanced_Downloader/releases).
-3. Copy the folder `advanced_downloader` into:
-   ```
-   /config/custom_components/advanced_downloader/
-   ```
-4. Restart Home Assistant.
-5. Add the integration from **Settings → Devices & Services → Add Integration → Advanced Downloader**.
+2. Go to **Settings → Marketplace**.
+3. Search for **Advanced Downloader**, select **Install**, and confirm the version.
+4. Complete setup when Home Assistant opens the integration page.
 
----
+### Option 2: HACS (Home Assistant 2026.10 or older)
 
-### Option 2: HACS Installation
 1. Install [Video Tools](https://github.com/Geek-MD/Video_Tools) via HACS first.
 2. Go to **HACS → Integrations → Custom Repositories**.
 3. Add the repository URL:
@@ -74,7 +76,13 @@
 6. Restart Home Assistant.
 7. Add the integration from **Settings → Devices & Services → Add Integration → Advanced Downloader**.
 
----
+### Option 3: Manual installation
+
+1. Install [Video Tools](https://github.com/Geek-MD/Video_Tools) first.
+2. Download the latest release from [GitHub](https://github.com/Geek-MD/Advanced_Downloader/releases).
+3. Copy `custom_components/advanced_downloader` to `/config/custom_components/advanced_downloader`.
+4. Restart Home Assistant.
+5. Add the integration from **Settings → Devices & Services → Add Integration → Advanced Downloader**.
 
 ## ⚙️ Configuration
 When adding the integration:
@@ -329,7 +337,7 @@ way you previously checked `sensor.video_normalizer_status`:
 
 ---
 
-## 🧾 License
+## 📜 License
 MIT License. See [LICENSE](LICENSE) for details.
 
 ---
