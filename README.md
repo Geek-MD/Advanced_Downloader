@@ -16,7 +16,7 @@
 
 **Advanced Downloader** is a custom Home Assistant integration that greatly extends file downloading capabilities beyond the built-in `downloader` integration. It downloads, normalizes, and manages media files directly from Home Assistant through simple services — and leverages [Video Tools](https://github.com/Geek-MD/Video_Tools) as a dependency for all video processing.
 
-Version **1.2.7** is prepared for Home Assistant 2026.11, including Marketplace metadata, deterministic dependencies, and awaited platform setup.
+Version **1.2.7** is prepared for Home Assistant 2026.11, including Marketplace metadata, an aligned `aiofiles` minimum version, and awaited platform setup.
 
 > **Domain:** `advanced_downloader`  
 > Advanced Downloader is a full superset of the core `downloader` integration. If you have `downloader:` in your `configuration.yaml`, a persistent notification will appear at startup reminding you to remove it. After removing it, restart Home Assistant.

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Added Home Assistant 2026.11 Marketplace category and integration-type metadata.
-- Pinned `aiofiles` to the version used by Home Assistant 2026.11.
+- Raised the minimum `aiofiles` version to the one used by Home Assistant 2026.11.
 - Config-entry platform setup is now awaited so setup failures are reported correctly.
 - Added the official HACS validation workflow and removed obsolete HACS metadata.
 
